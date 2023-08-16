@@ -1,0 +1,14 @@
+{
+  "resourceName": "petCareS3",
+  "policyUUID": "cbc44216",
+  "bucketName": "petcareappbucket",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "triggerFunction": "NONE",
+  "groupAccess": {}
+}

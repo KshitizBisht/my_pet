@@ -1,0 +1,78 @@
+enum RequestStatus {
+  REQUESTED
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+}
+
+type User @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  name: String!
+  email: String!
+  location: String
+  isCaretaker: Boolean!
+  userImagekey: String
+  userImageurl: String
+  pets: [Pet] @hasMany(indexName: "byUser", fields: ["id"])
+  requests: [Request] @hasMany(indexName: "byUser", fields: ["id"])
+  writtenReviews: [Review] @hasMany(indexName: "byReviewer", fields: ["id"])
+  receivedReviews: [Review] @hasMany(indexName: "byReviewee", fields: ["id"])
+}
+
+type Pet @model @auth(rules: [{ allow: owner, ownerField: "userID" }]) {
+  id: ID!
+  name: String!
+  type: String!
+  breed: String!
+  petImageKey: String
+  petImageUrl: String
+  age: Int!
+  diet: String!
+  nature: String!
+  userID: ID! @index(name: "byUser")
+  user: User! @belongsTo(fields: ["userID"])
+  petRequests: [PetRequest] @hasMany(indexName: "byPet", fields: ["id"])
+}
+
+type Request
+  @model
+  @auth(
+    rules: [
+      { allow: owner, ownerField: "ownerID" }
+      { allow: owner, ownerField: "caretakerID" }
+    ]
+  ) {
+  id: ID!
+  ownerID: ID! @index(name: "byUser")
+  owner: User! @belongsTo(fields: ["ownerID"])
+  caretakerID: ID!
+  caretaker: User! @belongsTo(fields: ["caretakerID"])
+  petRequests: [PetRequest] @hasMany(indexName: "byRequest", fields: ["id"])
+  status: RequestStatus
+  message: String
+}
+
+type PetRequest
+  @model
+  @auth(
+    rules: [
+      { allow: owner, ownerField: "requestID" }
+      { allow: owner, ownerField: "petID" }
+    ]
+  ) {
+  id: ID!
+  petID: ID! @index(name: "byPet")
+  pet: Pet! @belongsTo(fields: ["petID"])
+  requestID: ID! @index(name: "byRequest")
+  request: Request! @belongsTo(fields: ["requestID"])
+}
+
+type Review @model @auth(rules: [{ allow: owner, ownerField: "reviewerID" }]) {
+  id: ID!
+  rating: Float!
+  comment: String
+  reviewerID: ID! @index(name: "byReviewer")
+  reviewer: User! @belongsTo(fields: ["reviewerID"])
+  revieweeID: ID! @index(name: "byReviewee")
+  reviewee: User! @belongsTo(fields: ["revieweeID"])
+}
